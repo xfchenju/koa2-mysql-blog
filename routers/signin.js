@@ -1,5 +1,5 @@
 const router = require('koa-router')();
-const { findDataByName, insertData } = require('../lib/mysql.js');
+const { query, findDataByName, insertData } = require('../lib/mysql.js');
 const md5 = require('md5');
 const { checkNotLogin, checkLogin } = require('../middlewares/check.js');
 const moment = require('moment');
@@ -20,10 +20,24 @@ router.post('/signin', async(ctx, next) => {
         psw: ctx.request.body.password,
         moment: moment().unix()
     }
-    console.dir(user, 'user');
 
-    await findDataByName(user.name).then((res) => {
-        
+    await query(`SELECT * FROM users WHERE name = '${user.name}' AND pass = '${user.psw}'`).then((res)=>{
+        if(res.length > 0) {
+            console.log(`用户 ${res[0].name} 在 ${moment().format('YYYY-MM-DD HH:mm:ss')} 登录了`);
+            ctx.body = {
+                data: {
+                    code: '0',
+                    msg: '登录成功！'
+                }
+            }
+        }else {
+            ctx.body = {
+                data: {
+                    code: '1',
+                    msg: '用户名或密码错误！'
+                }
+            }
+        }
     })
 })
 

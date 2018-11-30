@@ -1,0 +1,15 @@
+<%- include("header",{type:'posts'}) %>
+
+    posts
+    <ul>
+        <% data.forEach(function(item){ %>
+            <li> 
+                <label>id：<%= item.name %> </label>
+                <label>名字：<%= item.name %> </label>
+                <label>最后登录时间：<%= item.moment %> </label>
+            </li>
+        <% }) %>
+    </ul>
+    
+
+<% include footer %>
