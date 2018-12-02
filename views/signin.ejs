@@ -1,71 +1,55 @@
-<%- include('header', {type: 'signup'}) %>
-    <div class="signup__container">
-        <form class="signup__form signup__form--login" method="post">
-            <div>
-                <label>用户名：</label>
-                <input type="text" placeholder="请输入用户名" name="name">
-            </div>
-            <div>
-                <label>密码：</label>
-                <input type="password" placeholder="请输入密码" name="password">
-            </div>
-            <!-- <div>
-                <label>上传头像：</label>
-                <input type="file" name="name" id="avator">
-            </div> -->
-            <div class="signup__formSubmit submit">登录</div>
-            <div style="clear: both"></div>
-        </form>
-    </div>
-    <script>
-        $(window).keyup(function (e) {
-            //console.log(e.keyCode)
-            if (e.keyCode == 13) {
-                $('.submit').click()
-            }
-        });
-        $('.submit').click(()=>{
-            let name = $('input[name=name]').val();
-            let pwd = $('input[name=password]').val();
-            
-            let msg = [];
-            // console.log($('.form').serialize())
-            if (name.trim() == '') {
-                msg.push('请输入用户名！');
-            }
-            if(pwd.trim() == '') {
-                msg.push('请输入密码！');
-            }
-            if(msg.length > 0) {
-                fade(msg.join(' '));
-                return false;
-            }
-            
-            $.ajax({
-                url: "/signin",
-                data: {
-                    name: name,
-                    password: pwd
-                },
-                type: "POST",
-                cache: false,
-                dataType: 'json',
-                success: function (res) {
-                    let code = res.data.code;
-                    let msg = res.data.msg;
-                    if(code === '0') {
-                        fade('登录成功')
-                        setTimeout(()=>{
-                            window.location.href = "/posts";      
-                        }, 1000)
-                    }else {
-                        fade(msg)
-                    }
-                },
-                error: function (err) {
-                    alert(err);
-                }
-            })  
-        })
-    </script>
-<%- include('footer') %>
+<%- include("header",{type:'signin'}) %>
+	<div class="container">
+		<form class="form create" method="post ">
+			<div>
+				<label>用户名：</label> 
+				<input placeholder="用户名" type="text" name="name">
+			</div>
+			<div>
+				<label>密码：</label> 
+				<input placeholder="密码" type="password" name="password">
+			</div>
+			<div class="submit">登录</div>
+		</form>		
+	</div>
+	<script>
+		$(window).keyup(function(e){
+			//console.log(e.keyCode)
+			if (e.keyCode == 13) {
+				$('.submit').click()
+			}
+		})
+		$('.submit').click(function(){
+			if ($('input[name=name]').val().trim() == '' || $('input[name=password]').val().trim() == '' ) {
+				fade('请输入用户名或密码')
+			}else{
+				console.log($('.form').serialize())
+				$.ajax({
+					url: "/signin",
+					data: $('.form').serialize(),
+					type: "POST",
+					cache: false,
+					dataType: 'json',
+					success: function (res) {
+						let code = res.data.code;
+						let msg = res.data.msg;
+						if(code === '0') {
+							fade('登录成功')
+						    setTimeout(function(){
+							    window.location.href = "/posts"
+						    },1500)
+						}else {
+							$('input').val('')
+						    fade(msg)
+						}
+					},
+					error: function () {
+						alert('异常');
+					}
+				})			
+			}
+		})		
+	</script>
+<% include footer %>
+
+	

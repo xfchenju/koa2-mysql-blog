@@ -20,10 +20,13 @@ router.post('/signin', async(ctx, next) => {
         psw: ctx.request.body.password,
         moment: moment().unix()
     }
-
-    await query(`SELECT * FROM users WHERE name = '${user.name}' AND pass = '${user.psw}'`).then((res)=>{
+    await query(`SELECT * FROM users WHERE name = '${user.name}' AND pass = '${md5(user.psw)}'`).then((res)=>{
         if(res.length > 0) {
             console.log(`用户 ${res[0].name} 在 ${moment().format('YYYY-MM-DD HH:mm:ss')} 登录了`);
+            ctx.session = {
+                user: res[0]['name'],
+                id: res[0]['id']
+            }
             ctx.body = {
                 data: {
                     code: '0',

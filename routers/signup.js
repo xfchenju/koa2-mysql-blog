@@ -1,5 +1,5 @@
 const router = require('koa-router')();
-const { findDataByName, insertData } = require('../lib/mysql.js');
+const { query } = require('../lib/mysql.js');
 const md5 = require('md5');
 const { checkNotLogin, checkLogin } = require('../middlewares/check.js');
 const moment = require('moment');
@@ -15,42 +15,54 @@ router.get('/signup', async(ctx, next) => {
 
 // 注册
 router.post('/signup', async(ctx, next) => {
-    let req = ctx.request.body;
-    let user = {
-        name: req.name,
-        psw: req.password,
-        repsw: req.repeatpass,
-        avator: '',
-        moment: moment().unix()
-    }
-    if(user.pws !== user.repsw) {
-        ctx.body = {
-            data: 1
-        };
-    }
+    let { name, password, repeatpass, avator } = ctx.request.body
 
-    await findDataByName(user.name).then(async(res) => {
-        if(res.length) {
-            try {
-                throw Error('用户名已存在');
-            }catch(error) {
-                console.dir(error);
-            } 
+    await query(`SELECT * FROM users WHERE name = '${name}'`).then(async(res)=>{
+        console.log(res, 'res');
+        if(res.length >= 1) {
+            // 用户存在
             ctx.body = {
-                data: 1
+                code: 500,
+                message: '用户存在'
+            };
+        }else if(avator && avator.trim() === '') {
+            ctx.body = {
+                code: 500,
+                message: '请上传头像'
             };
         }else {
-            await insertData(user).then(async(res)=>{
-                if(res.insertId) {
-                    ctx.body = {
-                        data: 3
-                    };
-                }else {
-                    ctx.body = {
-                        data: 4
-                    }; 
+            let base64Data = avator.replace(/^data:image\/\w+;base64,/, ""),
+                dataBuffer = new Buffer(base64Data, 'base64'),
+                getName = Number(Math.random().toString().substr(3)).toString(36) + Date.now(),
+                upload = await new Promise((reslove, reject)=>{
+                    fs.writeFile(`./public/images/${getName}.png`, dataBuffer, err => {
+                        if(err) {
+                            throw err;
+                            reject(err);
+                        }
+                        reslove(true);
+                        console.log('头像上传成功')
+                    })
+                })
+            if (upload) {
+                let data = [name, md5(password), getName, moment().format('YYYY-MM-DD HH:mm:ss')];
+                await query(`INSERT INTO users (name, pass, avator, moment) VALUES ('${data.join("','")}')`).then((res)=>{
+                    if(res.insertId) {
+                        console.log('注册成功', res)
+                        //注册成功
+                        ctx.body = {
+                            code: 200,
+                            message: '注册成功'
+                        };
+                    }
+                })
+            }else {
+                console.log('头像上传失败')
+                ctx.body = {
+                    code: 500,
+                    message: '头像上传失败'
                 }
-            })
+            }
         }
     })
 })
