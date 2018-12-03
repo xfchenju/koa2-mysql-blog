@@ -6,6 +6,11 @@ const moment = require('moment');
 const fs = require('fs');
 
 // 登录页面
+router.get('/', async(ctx, next) => {
+    ctx.redirect('/posts');
+})
+
+// 登录页面
 router.get('/signin', async(ctx, next) => {
     await checkNotLogin(ctx);
     await ctx.render('signin', {

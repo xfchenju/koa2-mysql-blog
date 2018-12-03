@@ -6,7 +6,7 @@ const moment = require('moment');
 const qs = require('querystring');
 const md = require('markdown-it')();  
 
-// 全部文章 和 我的文章
+// 全部文章 和 该作者的文章
 router.get('/posts', async(ctx, next) => {
     //  参数
     let resParams = ctx.request.querystring;
@@ -23,7 +23,7 @@ router.get('/posts', async(ctx, next) => {
                 res = data;
             })
         
-            await ctx.render('posts', {
+            await ctx.render('selfPosts', {
                 session: ctx.session,
                 posts: res,
                 postsLength: postCount,

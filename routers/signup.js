@@ -45,7 +45,7 @@ router.post('/signup', async(ctx, next) => {
                     })
                 })
             if (upload) {
-                let data = [name, md5(password), getName, moment().format('YYYY-MM-DD HH:mm:ss')];
+                let data = [name, md5(password), getName+'.png', moment().format('YYYY-MM-DD HH:mm:ss')];
                 await query(`INSERT INTO users (name, pass, avator, moment) VALUES ('${data.join("','")}')`).then((res)=>{
                     if(res.insertId) {
                         console.log('注册成功', res)
